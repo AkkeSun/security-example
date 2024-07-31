@@ -35,6 +35,14 @@ public class MemberService implements UserDetailsService {
         return new User(member.getUsername(), member.getPassword(), getAuthorities(member));
     }
 
+    // for custom auth
+    public UserDetails loadUserByUsernameAndSecretKey(String username)
+        throws UsernameNotFoundException {
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+            () -> new UsernameNotFoundException("USER IS NOT EXISTS"));
+        return new User(member.getUsername(), member.getSecretKey(), getAuthorities(member));
+    }
+
     private Collection<? extends GrantedAuthority> getAuthorities(Member member) {
         return List.of(new SimpleGrantedAuthority(member.getRole().name()));
     }
@@ -45,9 +53,9 @@ public class MemberService implements UserDetailsService {
             // 시큐리티 계정은 항상 password 가 암호화 되어있어야 합니다.
             Member member = new Member();
             member.setUsername("user");
-            member.setPassword("1234");
             member.setRole(Role.ROLE_USER);
             member.setPassword(passwordEncoder.encode("1234"));
+            member.setSecretKey(passwordEncoder.encode("test_key"));
             memberRepository.save(member);
         }
     }
