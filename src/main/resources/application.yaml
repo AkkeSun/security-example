@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: security-example
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    generate-ddl: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  datasource:
+    url: jdbc:h2:mem:chameleon;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
