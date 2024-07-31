@@ -1,5 +1,7 @@
 package com.sweettracker.securityexample.config;
 
+import com.sweettracker.securityexample.provider.CustomAuthenticationDetailsSource;
+import com.sweettracker.securityexample.provider.CustomAuthenticationProvider;
 import com.sweettracker.securityexample.service.MemberService;
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -23,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final MemberService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final CustomAuthenticationDetailsSource authenticationDetailsSource;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -30,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // --------------- 인증 정책 ---------------
         http
             .formLogin() // form 로그인 사용
+            .authenticationDetailsSource(authenticationDetailsSource) // 추가 입력필드 허용
             .loginPage("/login-page")              // 커스텀 로그인 페이지 url
             .loginProcessingUrl("/login-process")  // 로그인 프로세싱 url (default = /login)
             .usernameParameter("username")         // 로그인 아이디 파라미터명 (default = username)
@@ -82,9 +86,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     @Override
-    // ============= DB로 사용자 정보 관리하기 위한 설정 =============
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    // ============= CustomAuthenticationProvider 로 인증 처리 =============
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(
+            new CustomAuthenticationProvider(userDetailsService, passwordEncoder));
     }
 
     @Override
