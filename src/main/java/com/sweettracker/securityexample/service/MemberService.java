@@ -3,9 +3,9 @@ package com.sweettracker.securityexample.service;
 import com.sweettracker.securityexample.entity.Member;
 import com.sweettracker.securityexample.entity.Role;
 import com.sweettracker.securityexample.repository.MemberRepository;
+import jakarta.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,8 +40,8 @@ public class MemberService implements UserDetailsService {
     }
 
     @PostConstruct
-    public void init(){
-        if(memberRepository.findByUsername("user").isEmpty()){
+    public void init() {
+        if (memberRepository.findByUsername("user").isEmpty()) {
             // 시큐리티 계정은 항상 password 가 암호화 되어있어야 합니다.
             Member member = new Member();
             member.setUsername("user");
