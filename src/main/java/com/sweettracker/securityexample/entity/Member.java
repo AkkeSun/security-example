@@ -26,6 +26,9 @@ public class Member {
     @Column(name = "PASSWORD")
     private String password;
 
+    @Column(name = "SECRET_KEY")
+    private String secretKey;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 }
