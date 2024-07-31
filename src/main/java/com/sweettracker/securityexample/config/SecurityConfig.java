@@ -1,23 +1,35 @@
 package com.sweettracker.securityexample.config;
 
+import com.sweettracker.securityexample.provider.CustomAuthenticationDetailsSource;
+import com.sweettracker.securityexample.provider.CustomAuthenticationProvider;
+import com.sweettracker.securityexample.service.MemberService;
 import java.util.Collections;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-/*
-    인증을 위한 DB 설정을 따로 하지 않아도 됩니다.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomAuthenticationDetailsSource authenticationDetailsSource;
+    private final CustomAuthenticationProvider customAuthenticationProvider;
+
+    public SecurityConfig(MemberService userDetailsService, PasswordEncoder passwordEncoder,
+        CustomAuthenticationDetailsSource authenticationDetailsSource) {
+        this.authenticationDetailsSource = authenticationDetailsSource;
+        this.customAuthenticationProvider =
+            new CustomAuthenticationProvider(userDetailsService, passwordEncoder);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -25,6 +37,7 @@ public class SecurityConfig {
             // --------------- 인증 정책 ---------------
             .formLogin(login -> {
                 login.loginPage("/login-page")             // 커스텀 로그인 페이지 url
+                    .authenticationDetailsSource(authenticationDetailsSource) // 추가 입력필드 허용
                     .loginProcessingUrl("/login-process")  // 로그인 프로세싱 url (default = /login)
                     .usernameParameter("username")         // 로그인 아이디 파라미터명 (default = username)
                     .passwordParameter("password")         // 로그인 패스워드 파라미터명 (default = password)
@@ -59,6 +72,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
 
+            // ------------ customProvider 등록 ------------
+            .authenticationManager(new ProviderManager(customAuthenticationProvider));
         ;
         return http.build();
     }
